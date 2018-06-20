@@ -42,7 +42,7 @@ public class AddPlayerCommand {
         this.playersRepo = playersRepo;
     }
 
-    @ShellMethod(key = "Add player", value = "add a new player to the game")
+    @ShellMethod(key = "add player", value = "add a new player to the game")
     public String addPlayer(String playerName) {
         Preconditions.checkArgument(!StringUtils.isEmpty(playerName), "player name must not be empty");
 
