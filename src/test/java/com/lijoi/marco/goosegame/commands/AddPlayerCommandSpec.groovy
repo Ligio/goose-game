@@ -23,8 +23,9 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.lijoi.marco.goosegame
+package com.lijoi.marco.goosegame.commands
 
+import com.lijoi.marco.goosegame.repository.PlayersRepoInterface
 import spock.lang.Specification
 import spock.lang.Subject
 
@@ -42,7 +43,7 @@ class AddPlayerCommandSpec extends Specification {
       def response = command.addPlayer("Pippo")
 
     then: "the system responds: \"players: Pippo\""
-      1 * playersRepo.save("Pippo")
+      1 * playersRepo.registerNewPlayer("Pippo")
       1 * playersRepo.players >> ["Pippo"]
       response == "players: Pippo"
   }
@@ -55,7 +56,7 @@ class AddPlayerCommandSpec extends Specification {
       def response = command.addPlayer("Pluto")
 
     then: "the system responds: \"players: Pippo, Pluto\""
-      1 * playersRepo.save("Pluto")
+      1 * playersRepo.registerNewPlayer("Pluto")
       1 * playersRepo.players >> ["Pippo", "Pluto"]
       response == "players: Pippo, Pluto"
   }

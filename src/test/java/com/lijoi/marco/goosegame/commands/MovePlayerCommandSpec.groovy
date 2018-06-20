@@ -23,69 +23,33 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.lijoi.marco.goosegame
+package com.lijoi.marco.goosegame.commands
+
+import com.lijoi.marco.goosegame.PlayerWithPosition
+import com.lijoi.marco.goosegame.repository.PlayersRepoInterface
 import spock.lang.Specification
 import spock.lang.Subject
 
-
-class PlayersRepoSpec extends Specification {
+class MovePlayerCommandSpec extends Specification {
+  PlayersRepoInterface playersRepo = Mock()
 
   @Subject
-  def repo = new PlayersRepo()
+  def command = new MovePlayerCommand(playersRepo)
 
-  def "no partecipants registered"() {
+  def "Move player when rolling dices"() {
     given:
-      repo.players = []
+      playersRepo.isAlreadyPlaying("Pippo") >> true
+      playersRepo.move("Pippo", 4, 2) >> new PlayerWithPosition("Pippo", 6, 0)
+      playersRepo.move("Pippo", 2, 3) >> new PlayerWithPosition("Pippo", 11, 6)
 
-    expect:
-      repo.isEmpty()
-
-    and:
-      repo.getPlayers() == []
-  }
-
-  def "get partecipants list"() {
-    given:
-      repo.players = ["partecipant"]
-
-    expect:
-      repo.getPlayers() == ["partecipant"]
-  }
-
-  def "save a new partecipant"() {
-    given:
-      repo.players = []
+    when: "the user writes: \"move Pippo 4, 2\""
+      def response = command.movePlayer("Pippo", "4,", "2")
+    then: "the system responds: \"Pippo rolls 4, 2. Pippo moves from Start to 6\""
+      response == "Pippo rolls 4, 2. Pippo moves from Start to 6"
 
     when:
-      repo.save("Pippo")
-
+      response = command.movePlayer("Pippo", "2,", "3")
     then:
-      repo.getPlayers() == ["Pippo"]
-  }
-
-  def "save a empty or null player"() {
-    given:
-      repo.players = []
-
-    when: "trying to save a null player"
-      repo.save(null)
-    then:
-      repo.getPlayers() == []
-
-    when: "trying to save an empty player"
-      repo.save("")
-    then:
-      repo.getPlayers() == []
-  }
-
-  def "player is already playing check"() {
-    given:
-      repo.players = ["Pippo"]
-
-    expect:
-      repo.isAlreadyPlaying("Pippo")
-
-    and:
-      !repo.isAlreadyPlaying("Pluto")
+      response == "Pippo rolls 2, 3. Pippo moves from 6 to 11"
   }
 }

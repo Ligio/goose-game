@@ -1,5 +1,3 @@
-package com.lijoi.marco.goosegame;
-
 /*
  * Copyright (c) 2018 Marco Lijoi
  *
@@ -25,35 +23,38 @@ package com.lijoi.marco.goosegame;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import com.google.common.base.Joiner;
-import com.google.common.base.Preconditions;
-import org.springframework.shell.standard.ShellComponent;
-import org.springframework.shell.standard.ShellMethod;
-import org.springframework.util.StringUtils;
+package com.lijoi.marco.goosegame
 
-import javax.inject.Inject;
+import spock.lang.Specification
+import spock.lang.Subject
 
-@ShellComponent
-public class AddPlayerCommand {
-    private final PlayersRepoInterface playersRepo;
+class PlayerWithPositionSpec extends Specification {
 
-    @Inject
-    public AddPlayerCommand(PlayersRepoInterface playersRepo) {
-        this.playersRepo = playersRepo;
-    }
+  def "get position"() {
+    given:
+      @Subject
+      def playerWithPosition = new PlayerWithPosition("Pippo", 2, 1)
 
-    @ShellMethod(key = "add player", value = "add a new player to the game")
-    public String addPlayer(String playerName) {
-        Preconditions.checkArgument(!StringUtils.isEmpty(playerName), "player name must not be empty");
+    expect:
+      with(playerWithPosition) {
+        playerName == "Pippo"
+        currentPosition == 2
+        previousPosition == 1
+        currentPositionName == "2"
+      }
+  }
 
-        if (playersRepo.isAlreadyPlaying(playerName)) {
-            return String.format("%s: already existing player", playerName);
-        }
+  def "get starting position"() {
+    given:
+      @Subject
+      def playerEnteringGame = PlayerWithPosition.startPlaying("Pippo")
 
-        playersRepo.save(playerName);
-
-        return "players: " + Joiner.on(", ")
-                .skipNulls()
-                .join(playersRepo.getPlayers());
-    }
+    expect:
+      with(playerEnteringGame) {
+        playerName == "Pippo"
+        currentPosition == 0
+        previousPosition == 0
+        currentPositionName == "Start"
+      }
+  }
 }

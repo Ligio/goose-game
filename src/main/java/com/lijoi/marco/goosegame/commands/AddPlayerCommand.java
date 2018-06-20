@@ -1,4 +1,4 @@
-package com.lijoi.marco.goosegame;
+package com.lijoi.marco.goosegame.commands;
 
 /*
  * Copyright (c) 2018 Marco Lijoi
@@ -25,36 +25,44 @@ package com.lijoi.marco.goosegame;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
-import org.springframework.stereotype.Repository;
-import org.springframework.util.StringUtils;
+import com.lijoi.marco.goosegame.PlayerWithPosition;
+import com.lijoi.marco.goosegame.repository.PlayersRepoInterface;
+import org.springframework.shell.standard.ShellComponent;
+import org.springframework.shell.standard.ShellMethod;
 
-import java.util.ArrayList;
+import javax.inject.Inject;
 import java.util.List;
 
-@Repository
-public class PlayersRepo implements PlayersRepoInterface {
-    private List<String> players = new ArrayList<>();
+@ShellComponent
+public class AddPlayerCommand {
+    private final PlayersRepoInterface playersRepo;
 
-    @Override
-    public boolean isEmpty() {
-        return players.isEmpty();
+    @Inject
+    public AddPlayerCommand(PlayersRepoInterface playersRepo) {
+        this.playersRepo = playersRepo;
     }
 
-    @Override
-    public List<String> getPlayers() {
-        return ImmutableList.copyOf(players);
-    }
+    @ShellMethod(key = "add player", value = "add a new player to the game")
+    public String addPlayer(String playerName) {
 
-    @Override
-    public void save(String playerName) {
-        if (!StringUtils.isEmpty(playerName)) {
-            players.add(playerName);
+
+        if (playersRepo.isAlreadyPlaying(playerName)) {
+            return String.format("%s: already existing player", playerName);
         }
+
+        playersRepo.registerNewPlayer(playerName);
+
+        return "players: " + Joiner.on(", ")
+                .skipNulls()
+                .join(getPlayersName());
     }
 
-    @Override
-    public boolean isAlreadyPlaying(String playerName) {
-        return players.contains(playerName);
+    private List<String> getPlayersName() {
+
+        return playersRepo.getPlayers().stream()
+                .map(PlayerWithPosition::getPlayerName)
+                .collect(ImmutableList.toImmutableList());
     }
 }

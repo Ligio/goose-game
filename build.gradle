@@ -49,10 +49,8 @@ repositories {
 }
 
 dependencies {
-	/*
-	runtime('org.springframework.boot:spring-boot-devtools')
 	compileOnly('org.projectlombok:lombok')
-	*/
+
 	compile('org.springframework.boot:spring-boot-starter')
 	compile('org.springframework.shell:spring-shell-starter:2.0.1.RELEASE')
 
@@ -60,6 +58,9 @@ dependencies {
 	compile group: 'com.google.guava', name: 'guava', version: '25.1-jre'
 	// https://mvnrepository.com/artifact/javax.inject/javax.inject
 	compile group: 'javax.inject', name: 'javax.inject', version: '1'
+
+	// https://mvnrepository.com/artifact/org.apache.commons/commons-text
+	compile group: 'org.apache.commons', name: 'commons-text', version: '1.4'
 
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 	testCompile('org.springframework.shell:spring-shell-core-test-support:2.0.1.RELEASE')
