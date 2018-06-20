@@ -1,4 +1,4 @@
-package com.lijoi.marco.goosegame;
+package com.lijoi.marco.goosegame.repository;
 
 /*
  * Copyright (c) 2018 Marco Lijoi

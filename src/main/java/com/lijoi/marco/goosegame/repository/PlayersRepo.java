@@ -1,3 +1,5 @@
+package com.lijoi.marco.goosegame.repository;
+
 /*
  * Copyright (c) 2018 Marco Lijoi
  *
@@ -23,69 +25,36 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.lijoi.marco.goosegame
-import spock.lang.Specification
-import spock.lang.Subject
+import com.google.common.collect.ImmutableList;
+import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 
-class PlayersRepoSpec extends Specification {
+@Repository
+public class PlayersRepo implements PlayersRepoInterface {
+    private List<String> players = new ArrayList<>();
 
-  @Subject
-  def repo = new PlayersRepo()
+    @Override
+    public boolean isEmpty() {
+        return players.isEmpty();
+    }
 
-  def "no partecipants registered"() {
-    given:
-      repo.players = []
+    @Override
+    public List<String> getPlayers() {
+        return ImmutableList.copyOf(players);
+    }
 
-    expect:
-      repo.isEmpty()
+    @Override
+    public void save(String playerName) {
+        if (!StringUtils.isEmpty(playerName)) {
+            players.add(playerName);
+        }
+    }
 
-    and:
-      repo.getPlayers() == []
-  }
-
-  def "get partecipants list"() {
-    given:
-      repo.players = ["partecipant"]
-
-    expect:
-      repo.getPlayers() == ["partecipant"]
-  }
-
-  def "save a new partecipant"() {
-    given:
-      repo.players = []
-
-    when:
-      repo.save("Pippo")
-
-    then:
-      repo.getPlayers() == ["Pippo"]
-  }
-
-  def "save a empty or null player"() {
-    given:
-      repo.players = []
-
-    when: "trying to save a null player"
-      repo.save(null)
-    then:
-      repo.getPlayers() == []
-
-    when: "trying to save an empty player"
-      repo.save("")
-    then:
-      repo.getPlayers() == []
-  }
-
-  def "player is already playing check"() {
-    given:
-      repo.players = ["Pippo"]
-
-    expect:
-      repo.isAlreadyPlaying("Pippo")
-
-    and:
-      !repo.isAlreadyPlaying("Pluto")
-  }
+    @Override
+    public boolean isAlreadyPlaying(String playerName) {
+        return players.contains(playerName);
+    }
 }

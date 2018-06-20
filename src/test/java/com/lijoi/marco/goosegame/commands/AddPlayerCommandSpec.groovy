@@ -23,8 +23,9 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.lijoi.marco.goosegame
+package com.lijoi.marco.goosegame.commands
 
+import com.lijoi.marco.goosegame.repository.PlayersRepoInterface
 import spock.lang.Specification
 import spock.lang.Subject
 

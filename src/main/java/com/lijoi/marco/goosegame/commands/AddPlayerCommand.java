@@ -1,4 +1,4 @@
-package com.lijoi.marco.goosegame;
+package com.lijoi.marco.goosegame.commands;
 
 /*
  * Copyright (c) 2018 Marco Lijoi
@@ -25,36 +25,36 @@ package com.lijoi.marco.goosegame;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import com.google.common.collect.ImmutableList;
-import org.springframework.stereotype.Repository;
+import com.google.common.base.Joiner;
+import com.google.common.base.Preconditions;
+import com.lijoi.marco.goosegame.repository.PlayersRepoInterface;
+import org.springframework.shell.standard.ShellComponent;
+import org.springframework.shell.standard.ShellMethod;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.inject.Inject;
 
-@Repository
-public class PlayersRepo implements PlayersRepoInterface {
-    private List<String> players = new ArrayList<>();
+@ShellComponent
+public class AddPlayerCommand {
+    private final PlayersRepoInterface playersRepo;
 
-    @Override
-    public boolean isEmpty() {
-        return players.isEmpty();
+    @Inject
+    public AddPlayerCommand(PlayersRepoInterface playersRepo) {
+        this.playersRepo = playersRepo;
     }
 
-    @Override
-    public List<String> getPlayers() {
-        return ImmutableList.copyOf(players);
-    }
+    @ShellMethod(key = "add player", value = "add a new player to the game")
+    public String addPlayer(String playerName) {
+        Preconditions.checkArgument(!StringUtils.isEmpty(playerName), "player name must not be empty");
 
-    @Override
-    public void save(String playerName) {
-        if (!StringUtils.isEmpty(playerName)) {
-            players.add(playerName);
+        if (playersRepo.isAlreadyPlaying(playerName)) {
+            return String.format("%s: already existing player", playerName);
         }
-    }
 
-    @Override
-    public boolean isAlreadyPlaying(String playerName) {
-        return players.contains(playerName);
+        playersRepo.save(playerName);
+
+        return "players: " + Joiner.on(", ")
+                .skipNulls()
+                .join(playersRepo.getPlayers());
     }
 }

@@ -1,5 +1,3 @@
-package com.lijoi.marco.goosegame;
-
 /*
  * Copyright (c) 2018 Marco Lijoi
  *
@@ -25,35 +23,69 @@ package com.lijoi.marco.goosegame;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import com.google.common.base.Joiner;
-import com.google.common.base.Preconditions;
-import org.springframework.shell.standard.ShellComponent;
-import org.springframework.shell.standard.ShellMethod;
-import org.springframework.util.StringUtils;
+package com.lijoi.marco.goosegame.repository
 
-import javax.inject.Inject;
+import spock.lang.Specification
+import spock.lang.Subject
 
-@ShellComponent
-public class AddPlayerCommand {
-    private final PlayersRepoInterface playersRepo;
+class PlayersRepoSpec extends Specification {
 
-    @Inject
-    public AddPlayerCommand(PlayersRepoInterface playersRepo) {
-        this.playersRepo = playersRepo;
-    }
+  @Subject
+  def repo = new PlayersRepo()
 
-    @ShellMethod(key = "add player", value = "add a new player to the game")
-    public String addPlayer(String playerName) {
-        Preconditions.checkArgument(!StringUtils.isEmpty(playerName), "player name must not be empty");
+  def "no partecipants registered"() {
+    given:
+      repo.players = []
 
-        if (playersRepo.isAlreadyPlaying(playerName)) {
-            return String.format("%s: already existing player", playerName);
-        }
+    expect:
+      repo.isEmpty()
 
-        playersRepo.save(playerName);
+    and:
+      repo.getPlayers() == []
+  }
 
-        return "players: " + Joiner.on(", ")
-                .skipNulls()
-                .join(playersRepo.getPlayers());
-    }
+  def "get partecipants list"() {
+    given:
+      repo.players = ["partecipant"]
+
+    expect:
+      repo.getPlayers() == ["partecipant"]
+  }
+
+  def "save a new partecipant"() {
+    given:
+      repo.players = []
+
+    when:
+      repo.save("Pippo")
+
+    then:
+      repo.getPlayers() == ["Pippo"]
+  }
+
+  def "save a empty or null player"() {
+    given:
+      repo.players = []
+
+    when: "trying to save a null player"
+      repo.save(null)
+    then:
+      repo.getPlayers() == []
+
+    when: "trying to save an empty player"
+      repo.save("")
+    then:
+      repo.getPlayers() == []
+  }
+
+  def "player is already playing check"() {
+    given:
+      repo.players = ["Pippo"]
+
+    expect:
+      repo.isAlreadyPlaying("Pippo")
+
+    and:
+      !repo.isAlreadyPlaying("Pluto")
+  }
 }
