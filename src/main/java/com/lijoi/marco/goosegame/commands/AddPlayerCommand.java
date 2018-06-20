@@ -26,13 +26,14 @@ package com.lijoi.marco.goosegame.commands;
  */
 
 import com.google.common.base.Joiner;
-import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
+import com.lijoi.marco.goosegame.PlayerWithPosition;
 import com.lijoi.marco.goosegame.repository.PlayersRepoInterface;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
-import org.springframework.util.StringUtils;
 
 import javax.inject.Inject;
+import java.util.List;
 
 @ShellComponent
 public class AddPlayerCommand {
@@ -45,16 +46,23 @@ public class AddPlayerCommand {
 
     @ShellMethod(key = "add player", value = "add a new player to the game")
     public String addPlayer(String playerName) {
-        Preconditions.checkArgument(!StringUtils.isEmpty(playerName), "player name must not be empty");
+
 
         if (playersRepo.isAlreadyPlaying(playerName)) {
             return String.format("%s: already existing player", playerName);
         }
 
-        playersRepo.save(playerName);
+        playersRepo.registerNewPlayer(playerName);
 
         return "players: " + Joiner.on(", ")
                 .skipNulls()
-                .join(playersRepo.getPlayers());
+                .join(getPlayersName());
+    }
+
+    private List<String> getPlayersName() {
+
+        return playersRepo.getPlayers().stream()
+                .map(PlayerWithPosition::getPlayerName)
+                .collect(ImmutableList.toImmutableList());
     }
 }

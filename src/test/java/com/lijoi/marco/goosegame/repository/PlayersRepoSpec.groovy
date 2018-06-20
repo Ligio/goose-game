@@ -25,10 +25,12 @@
 
 package com.lijoi.marco.goosegame.repository
 
+import com.lijoi.marco.goosegame.PlayerWithPosition
 import spock.lang.Specification
 import spock.lang.Subject
 
 class PlayersRepoSpec extends Specification {
+  PlayerWithPosition genericPlayerWithPosition = Mock()
 
   @Subject
   def repo = new PlayersRepo()
@@ -46,46 +48,71 @@ class PlayersRepoSpec extends Specification {
 
   def "get partecipants list"() {
     given:
-      repo.players = ["partecipant"]
+      repo.players = [genericPlayerWithPosition]
 
     expect:
-      repo.getPlayers() == ["partecipant"]
+      repo.getPlayers() == [genericPlayerWithPosition]
   }
 
-  def "save a new partecipant"() {
+  def "register a new partecipant"() {
     given:
       repo.players = []
 
     when:
-      repo.save("Pippo")
+      repo.registerNewPlayer("Pippo")
 
     then:
-      repo.getPlayers() == ["Pippo"]
+      repo.getPlayers() == [PlayerWithPosition.startPlaying("Pippo")]
   }
 
-  def "save a empty or null player"() {
+  def "register an empty or null player"() {
     given:
       repo.players = []
 
     when: "trying to save a null player"
-      repo.save(null)
+      repo.registerNewPlayer(null)
     then:
       repo.getPlayers() == []
 
     when: "trying to save an empty player"
-      repo.save("")
+      repo.registerNewPlayer("")
     then:
       repo.getPlayers() == []
   }
 
-  def "player is already playing check"() {
+  def "player is already playing"() {
     given:
-      repo.players = ["Pippo"]
+      repo.players = [new PlayerWithPosition("Pippo", 3, 2)]
 
     expect:
       repo.isAlreadyPlaying("Pippo")
 
     and:
       !repo.isAlreadyPlaying("Pluto")
+  }
+
+  def "move player"() {
+    given:
+      def startingPlayer = PlayerWithPosition.startPlaying("Pluto")
+      def player = new PlayerWithPosition("Pippo", 3, 2)
+      repo.players = [player, startingPlayer]
+
+    expect:
+      repo.move("Pippo", 4, 2) == new PlayerWithPosition("Pippo", 9, 3)
+
+    and:
+      repo.move("Pluto", 4, 6) == new PlayerWithPosition("Pluto", 10, 0)
+  }
+
+  def "update player position"() {
+    given:
+      def player = new PlayerWithPosition("Pippo", 3, 2)
+      repo.players = [player]
+
+    when:
+      repo.saveNewPosition(new PlayerWithPosition("Pippo", 5, 3))
+
+    then:
+      repo.findByName("Pippo").get().currentPosition == 5
   }
 }

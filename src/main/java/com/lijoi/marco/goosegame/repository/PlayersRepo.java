@@ -26,15 +26,19 @@ package com.lijoi.marco.goosegame.repository;
  */
 
 import com.google.common.collect.ImmutableList;
+import com.lijoi.marco.goosegame.PlayerWithPosition;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class PlayersRepo implements PlayersRepoInterface {
-    private List<String> players = new ArrayList<>();
+
+    // Map of playerName, position
+    private List<PlayerWithPosition> players = new ArrayList<>();
 
     @Override
     public boolean isEmpty() {
@@ -42,19 +46,53 @@ public class PlayersRepo implements PlayersRepoInterface {
     }
 
     @Override
-    public List<String> getPlayers() {
+    public List<PlayerWithPosition> getPlayers() {
         return ImmutableList.copyOf(players);
     }
 
     @Override
-    public void save(String playerName) {
+    public void registerNewPlayer(String playerName) {
         if (!StringUtils.isEmpty(playerName)) {
-            players.add(playerName);
+            players.add(PlayerWithPosition.startPlaying(playerName));
         }
     }
 
     @Override
     public boolean isAlreadyPlaying(String playerName) {
-        return players.contains(playerName);
+        return players.stream()
+                .anyMatch(playerWithPosition -> playerWithPosition.getPlayerName().equals(playerName));
+    }
+
+    private Optional<PlayerWithPosition> findByName(String playerName) {
+        return players.stream()
+                .filter(player -> player.getPlayerName().equals(playerName))
+                .findAny();
+    }
+
+    @Override
+    public PlayerWithPosition move(String playerName, int diceValue, int otherDiceValue) {
+        PlayerWithPosition player = findByName(playerName)
+                .orElseThrow(() -> new IllegalArgumentException(String.format("Player %s not found!", playerName)));
+
+        return new PlayerWithPosition(
+                player.getPlayerName(),
+                computeNextPosition(player, diceValue, otherDiceValue),
+                player.getCurrentPosition()  // this will be the old position
+        );
+    }
+
+    @Override
+    public void saveNewPosition(PlayerWithPosition playerWithNewPosition) {
+        findByName(playerWithNewPosition.getPlayerName()).ifPresent(
+                playerWithOldPosition -> updatePlayerPosition(playerWithNewPosition, playerWithOldPosition)
+        );
+    }
+
+    private PlayerWithPosition updatePlayerPosition(PlayerWithPosition playerWithNewPosition, PlayerWithPosition playerWithOldPosition) {
+        return players.set(players.indexOf(playerWithOldPosition), playerWithNewPosition);
+    }
+
+    private int computeNextPosition(PlayerWithPosition player, int diceValue, int otherDiceValue) {
+        return player.getCurrentPosition() + diceValue + otherDiceValue;
     }
 }

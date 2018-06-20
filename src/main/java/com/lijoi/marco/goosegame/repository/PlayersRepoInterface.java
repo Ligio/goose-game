@@ -25,14 +25,20 @@ package com.lijoi.marco.goosegame.repository;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import com.lijoi.marco.goosegame.PlayerWithPosition;
+
 import java.util.List;
 
 public interface PlayersRepoInterface {
     boolean isEmpty();
 
-    List<String> getPlayers();
+    List<PlayerWithPosition> getPlayers();
 
-    void save(String playerName);
+    void registerNewPlayer(String playerName);
 
     boolean isAlreadyPlaying(String playerName);
+
+    PlayerWithPosition move(String playerName, int diceValue, int otherDiceValue);
+
+    void saveNewPosition(PlayerWithPosition playerWithNewPosition);
 }

@@ -25,59 +25,31 @@
 
 package com.lijoi.marco.goosegame.commands
 
+import com.lijoi.marco.goosegame.PlayerWithPosition
 import com.lijoi.marco.goosegame.repository.PlayersRepoInterface
 import spock.lang.Specification
 import spock.lang.Subject
 
-class AddPlayerCommandSpec extends Specification {
+class MovePlayerCommandSpec extends Specification {
   PlayersRepoInterface playersRepo = Mock()
 
   @Subject
-  def command = new AddPlayerCommand(playersRepo)
+  def command = new MovePlayerCommand(playersRepo)
 
-  def "Add a new player when there is no partecipants"() {
-    given: "there is no participant"
-      playersRepo.players == []
-
-    when: "the user writes: \"add player Pippo\""
-      def response = command.addPlayer("Pippo")
-
-    then: "the system responds: \"players: Pippo\""
-      1 * playersRepo.registerNewPlayer("Pippo")
-      1 * playersRepo.players >> ["Pippo"]
-      response == "players: Pippo"
-  }
-
-  def "Add a new player"() {
-    given: "Pippo is already playing"
-      playersRepo.players == ["Pippo"]
-
-    when: "the user writes: \"add player Pluto\""
-      def response = command.addPlayer("Pluto")
-
-    then: "the system responds: \"players: Pippo, Pluto\""
-      1 * playersRepo.registerNewPlayer("Pluto")
-      1 * playersRepo.players >> ["Pippo", "Pluto"]
-      response == "players: Pippo, Pluto"
-  }
-
-  def "Trying to add a new empty player"() {
-    when:
-      command.addPlayer("")
-
-    then:
-      def e = thrown(IllegalArgumentException)
-      e.message == "player name must not be empty"
-  }
-
-  def "duplicated player"() {
-    given: "Pippo is already playing"
+  def "Move player when rolling dices"() {
+    given:
       playersRepo.isAlreadyPlaying("Pippo") >> true
+      playersRepo.move("Pippo", 4, 2) >> new PlayerWithPosition("Pippo", 6, 0)
+      playersRepo.move("Pippo", 2, 3) >> new PlayerWithPosition("Pippo", 11, 6)
 
-    when: "the user writes: \"add player Pippo\""
-      def response = command.addPlayer("Pippo")
+    when: "the user writes: \"move Pippo 4, 2\""
+      def response = command.movePlayer("Pippo", "4,", "2")
+    then: "the system responds: \"Pippo rolls 4, 2. Pippo moves from Start to 6\""
+      response == "Pippo rolls 4, 2. Pippo moves from Start to 6"
 
+    when:
+      response = command.movePlayer("Pippo", "2,", "3")
     then:
-      response == "Pippo: already existing player"
+      response == "Pippo rolls 2, 3. Pippo moves from 6 to 11"
   }
 }
