@@ -37,6 +37,8 @@ import org.springframework.shell.standard.ShellOption;
 import javax.inject.Inject;
 import java.util.Map;
 
+import static com.lijoi.marco.goosegame.PlayerWithPosition.END_POSITION_INDEX;
+
 @ShellComponent
 public class MovePlayerCommand {
     private final PlayersRepoInterface playersRepo;
@@ -69,8 +71,12 @@ public class MovePlayerCommand {
         );
 
         String templateString = "${playerName} rolls ${dice1}, ${dice2}. ${playerName} moves from ${previousPosition} to ${nextPosition}";
-        StringSubstitutor sub = new StringSubstitutor(valuesMap);
 
+        if (playerAfterMove.getCurrentPosition() == END_POSITION_INDEX) {
+            templateString += String.format(". %s Wins!!", playerName);
+        }
+
+        StringSubstitutor sub = new StringSubstitutor(valuesMap);
         return sub.replace(templateString);
     }
 

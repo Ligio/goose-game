@@ -33,6 +33,7 @@ import org.springframework.util.StringUtils;
 public class PlayerWithPosition {
     public static final String START_POSITION_NAME = "Start";
     public static final int START_POSITION_INDEX = 0;
+    public static final int END_POSITION_INDEX = 63;
 
     private final String playerName;
     private int previousPosition;
