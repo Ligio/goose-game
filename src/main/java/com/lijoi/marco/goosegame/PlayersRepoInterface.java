@@ -33,4 +33,6 @@ public interface PlayersRepoInterface {
     List<String> getPlayers();
 
     void save(String playerName);
+
+    boolean isAlreadyPlaying(String playerName);
 }

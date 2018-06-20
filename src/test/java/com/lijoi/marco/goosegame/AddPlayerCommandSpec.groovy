@@ -68,4 +68,15 @@ class AddPlayerCommandSpec extends Specification {
       def e = thrown(IllegalArgumentException)
       e.message == "player name must not be empty"
   }
+
+  def "duplicated player"() {
+    given: "Pippo is already playing"
+      playersRepo.isAlreadyPlaying("Pippo") >> true
+
+    when: "the user writes: \"add player Pippo\""
+      def response = command.addPlayer("Pippo")
+
+    then:
+      response == "Pippo: already existing player"
+  }
 }

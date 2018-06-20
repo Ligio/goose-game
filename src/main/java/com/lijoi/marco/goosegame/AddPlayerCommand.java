@@ -46,6 +46,10 @@ public class AddPlayerCommand {
     public String addPlayer(String playerName) {
         Preconditions.checkArgument(!StringUtils.isEmpty(playerName), "player name must not be empty");
 
+        if (playersRepo.isAlreadyPlaying(playerName)) {
+            return String.format("%s: already existing player", playerName);
+        }
+
         playersRepo.save(playerName);
 
         return "players: " + Joiner.on(", ")

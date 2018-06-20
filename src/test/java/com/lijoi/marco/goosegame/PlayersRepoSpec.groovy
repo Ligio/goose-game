@@ -77,4 +77,15 @@ class PlayersRepoSpec extends Specification {
     then:
       repo.getPlayers() == []
   }
+
+  def "player is already playing check"() {
+    given:
+      repo.players = ["Pippo"]
+
+    expect:
+      repo.isAlreadyPlaying("Pippo")
+
+    and:
+      !repo.isAlreadyPlaying("Pluto")
+  }
 }

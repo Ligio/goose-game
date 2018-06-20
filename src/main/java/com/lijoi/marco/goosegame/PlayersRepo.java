@@ -52,4 +52,9 @@ public class PlayersRepo implements PlayersRepoInterface {
             players.add(playerName);
         }
     }
+
+    @Override
+    public boolean isAlreadyPlaying(String playerName) {
+        return players.contains(playerName);
+    }
 }
