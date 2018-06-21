@@ -25,6 +25,7 @@
 
 package com.lijoi.marco.goosegame.commands
 
+import com.lijoi.marco.goosegame.PlayerWithPosition
 import com.lijoi.marco.goosegame.repository.PlayersRepoInterface
 import spock.lang.Specification
 import spock.lang.Subject
@@ -44,24 +45,28 @@ class AddPlayerCommandSpec extends Specification {
 
     then: "the system responds: \"players: Pippo\""
       1 * playersRepo.registerNewPlayer("Pippo")
-      1 * playersRepo.players >> ["Pippo"]
+      1 * playersRepo.players >> [PlayerWithPosition.startPlaying("Pippo")]
       response == "players: Pippo"
   }
 
   def "Add a new player"() {
     given: "Pippo is already playing"
-      playersRepo.players == ["Pippo"]
+      playersRepo.players == [PlayerWithPosition.startPlaying("Pippo")]
 
     when: "the user writes: \"add player Pluto\""
       def response = command.addPlayer("Pluto")
 
     then: "the system responds: \"players: Pippo, Pluto\""
       1 * playersRepo.registerNewPlayer("Pluto")
-      1 * playersRepo.players >> ["Pippo", "Pluto"]
+      1 * playersRepo.players >> [PlayerWithPosition.startPlaying("Pippo"),
+                                  PlayerWithPosition.startPlaying("Pluto")]
       response == "players: Pippo, Pluto"
   }
 
   def "Trying to add a new empty player"() {
+    given:
+      playersRepo.players >> []
+
     when:
       command.addPlayer("")
 
