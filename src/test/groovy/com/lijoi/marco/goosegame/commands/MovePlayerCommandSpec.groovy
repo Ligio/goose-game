@@ -25,6 +25,7 @@
 
 package com.lijoi.marco.goosegame.commands
 
+import com.lijoi.marco.goosegame.DiceValueGenerator
 import com.lijoi.marco.goosegame.PlayerWithPosition
 import com.lijoi.marco.goosegame.formatters.MoveReplyFormatter
 import com.lijoi.marco.goosegame.repository.PlayersRepoInterface
@@ -34,9 +35,10 @@ import spock.lang.Subject
 class MovePlayerCommandSpec extends Specification {
   PlayersRepoInterface playersRepo = Mock()
   MoveReplyFormatter moveReplyFormatter = Mock()
+  DiceValueGenerator diceValueGenerator = Mock()
 
   @Subject
-  def command = new MovePlayerCommand(playersRepo, moveReplyFormatter)
+  def command = new MovePlayerCommand(playersRepo, moveReplyFormatter, diceValueGenerator)
 
   def "Move player when rolling dices"() {
     given:
@@ -47,6 +49,21 @@ class MovePlayerCommandSpec extends Specification {
 
     when:
       def response = command.movePlayer("Pippo", "4,", "2")
+    then:
+      response == "pippo is moving!"
+  }
+
+  def "The game rolls dices for the player"() {
+    given:
+      def playerAfterMove = new PlayerWithPosition("Pippo", 4, 0)
+      playersRepo.isAlreadyPlaying("Pippo") >> true
+      playersRepo.move("Pippo", 4, 2) >> playerAfterMove
+      moveReplyFormatter.reply(playerAfterMove, 4, 2) >> "pippo is moving!"
+      diceValueGenerator.throwsTheDice() >>> [4, 2]
+
+    when:
+      def response = command.movePlayer("Pippo", "", "")
+
     then:
       response == "pippo is moving!"
   }
