@@ -63,4 +63,15 @@ class MovePlayerCommandSpec extends Specification {
     then:
       response == "Pippo rolls 1, 2. Pippo moves from 60 to 63. Pippo Wins!!"
   }
+
+  def "Player bounces"() {
+    given:
+      playersRepo.isAlreadyPlaying("Pippo") >> true
+      playersRepo.move("Pippo", 3, 2) >> new PlayerWithPosition("Pippo", 61, 60)
+
+    when:
+      def response = command.movePlayer("Pippo", "3,", "2")
+    then:
+      response == "Pippo rolls 3, 2. Pippo moves from 60 to 63. Pippo bounces! Pippo returns to 61"
+  }
 }

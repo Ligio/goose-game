@@ -104,6 +104,15 @@ class PlayersRepoSpec extends Specification {
       repo.move("Pluto", 4, 6) == new PlayerWithPosition("Pluto", 10, 0)
   }
 
+  def "bounce player"() {
+    given:
+      def player = new PlayerWithPosition("Pippo", 60, 57)
+      repo.players = [player]
+
+    expect:
+      repo.move("Pippo", 3, 2) == new PlayerWithPosition("Pippo", 61, 60)
+  }
+
   def "update player position"() {
     given:
       def player = new PlayerWithPosition("Pippo", 3, 2)

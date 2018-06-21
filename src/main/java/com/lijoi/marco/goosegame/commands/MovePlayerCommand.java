@@ -62,8 +62,12 @@ public class MovePlayerCommand {
         PlayerWithPosition playerAfterMove = playersRepo.move(playerName, diceValue, otherDiceValue);
         playersRepo.saveNewPosition(playerAfterMove);
 
+        return formatMessage(playerAfterMove, diceValue, otherDiceValue);
+    }
+
+    private String formatMessage(PlayerWithPosition playerAfterMove, int diceValue, int otherDiceValue) {
         Map<String, String> valuesMap = ImmutableMap.of(
-                "playerName", playerName,
+                "playerName", playerAfterMove.getPlayerName(),
                 "dice1", String.valueOf(diceValue),
                 "dice2", String.valueOf(otherDiceValue),
                 "previousPosition", playerAfterMove.getPreviousPositionName(),
@@ -73,7 +77,7 @@ public class MovePlayerCommand {
         String templateString = "${playerName} rolls ${dice1}, ${dice2}. ${playerName} moves from ${previousPosition} to ${nextPosition}";
 
         if (playerAfterMove.getCurrentPosition() == END_POSITION_INDEX) {
-            templateString += String.format(". %s Wins!!", playerName);
+            templateString += String.format(". %s Wins!!", playerAfterMove.getPlayerName());
         }
 
         StringSubstitutor sub = new StringSubstitutor(valuesMap);

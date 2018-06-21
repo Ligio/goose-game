@@ -10,3 +10,9 @@ Double press **TAB** to see the list of all available commands while playing Goo
 or type **help** if you want to read the commands description
 
 If you want to exit the game, write **exit** and press ENTER
+
+Tests run with this command:
+
+```js
+./run.sh test
+```
