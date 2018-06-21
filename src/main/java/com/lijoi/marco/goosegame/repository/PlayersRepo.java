@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static com.lijoi.marco.goosegame.PlayerWithPosition.END_POSITION_INDEX;
+import static com.lijoi.marco.goosegame.Board.END_POSITION_INDEX;
 
 @Repository
 public class PlayersRepo implements PlayersRepoInterface {

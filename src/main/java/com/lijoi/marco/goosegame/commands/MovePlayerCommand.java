@@ -26,12 +26,14 @@ package com.lijoi.marco.goosegame.commands;
  */
 
 import com.google.common.base.Preconditions;
+import com.lijoi.marco.goosegame.DiceValueGenerator;
 import com.lijoi.marco.goosegame.PlayerWithPosition;
 import com.lijoi.marco.goosegame.formatters.MoveReplyFormatter;
 import com.lijoi.marco.goosegame.repository.PlayersRepoInterface;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
+import org.springframework.util.StringUtils;
 
 import javax.inject.Inject;
 
@@ -39,15 +41,20 @@ import javax.inject.Inject;
 public class MovePlayerCommand {
     private final PlayersRepoInterface playersRepo;
     private final MoveReplyFormatter moveReplyFormatter;
+    private final DiceValueGenerator diceValueGenerator;
 
     @Inject
-    public MovePlayerCommand(PlayersRepoInterface playersRepo, MoveReplyFormatter moveReplyFormatter) {
+    public MovePlayerCommand(PlayersRepoInterface playersRepo, MoveReplyFormatter moveReplyFormatter, DiceValueGenerator diceValueGenerator) {
         this.playersRepo = playersRepo;
         this.moveReplyFormatter = moveReplyFormatter;
+        this.diceValueGenerator = diceValueGenerator;
     }
 
     @ShellMethod(key = "move", value = "move player to another position")
-    public String movePlayer(String playerName, String diceValueString, @ShellOption(defaultValue = "") String otherDiceValueString) {
+    public String movePlayer(String playerName,
+                             @ShellOption(defaultValue = "") String diceValueString,
+                             @ShellOption(defaultValue = "") String otherDiceValueString) {
+
         String[] diceValues = concatCliArgumentsToExtractValues(diceValueString, otherDiceValueString);
 
         int diceValue = convertToInt(diceValues[0]);
@@ -68,7 +75,19 @@ public class MovePlayerCommand {
     }
 
     private String[] concatCliArgumentsToExtractValues(String diceValueString, String otherDiceValueString) {
+
+        if (StringUtils.isEmpty(diceValueString.trim())) {
+            return randomDiceValues();
+        }
+
         return (diceValueString + otherDiceValueString).split(",");
+    }
+
+    private String[] randomDiceValues() {
+        return new String[] {
+                String.valueOf(diceValueGenerator.throwsTheDice()),
+                String.valueOf(diceValueGenerator.throwsTheDice())
+        };
     }
 
     private boolean areDiceValuesGreatherThanZero(int diceValue, int otherDiceValue) {

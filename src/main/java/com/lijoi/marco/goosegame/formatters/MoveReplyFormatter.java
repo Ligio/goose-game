@@ -32,7 +32,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
-import static com.lijoi.marco.goosegame.PlayerWithPosition.END_POSITION_INDEX;
+import static com.lijoi.marco.goosegame.Board.END_POSITION_INDEX;
 
 @Component
 public class MoveReplyFormatter {
