@@ -23,44 +23,43 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.lijoi.marco.goosegame.commands
+package com.lijoi.marco.goosegame.formatters
 
 import com.lijoi.marco.goosegame.PlayerWithPosition
-import com.lijoi.marco.goosegame.repository.PlayersRepoInterface
 import spock.lang.Specification
 import spock.lang.Subject
 
-class MovePlayerCommandSpec extends Specification {
-  PlayersRepoInterface playersRepo = Mock()
+class MoveReplyFormatterSpec extends Specification {
 
   @Subject
-  def command = new MovePlayerCommand(playersRepo)
+  def formatter = new MoveReplyFormatter()
 
-  def "Move player when rolling dices"() {
+  def "give details on player move"() {
     given:
-      playersRepo.isAlreadyPlaying("Pippo") >> true
-      playersRepo.move("Pippo", 4, 2) >> new PlayerWithPosition("Pippo", 6, 0)
-      playersRepo.move("Pippo", 2, 3) >> new PlayerWithPosition("Pippo", 11, 6)
+      def playerAtStart = new PlayerWithPosition("Pippo", 6, 0)
+      def anotherPlayer = new PlayerWithPosition("Pippo", 16, 12)
 
-    when: "the user writes: \"move Pippo 4, 2\""
-      def response = command.movePlayer("Pippo", "4,", "2")
-    then: "the system responds: \"Pippo rolls 4, 2. Pippo moves from Start to 6\""
-      response == "Pippo rolls 4, 2. Pippo moves from Start to 6"
+    expect:
+      formatter.reply(playerAtStart, 4, 2) == "Pippo rolls 4, 2. Pippo moves from Start to 6"
 
-    when:
-      response = command.movePlayer("Pippo", "2,", "3")
-    then:
-      response == "Pippo rolls 2, 3. Pippo moves from 6 to 11"
+    and:
+      formatter.reply(anotherPlayer, 3, 1) == "Pippo rolls 3, 1. Pippo moves from 12 to 16"
   }
 
-  def "Player wins when lands on 63 space"() {
+  def "give details when player win"() {
     given:
-      playersRepo.isAlreadyPlaying("Pippo") >> true
-      playersRepo.move("Pippo", 1, 2) >> new PlayerWithPosition("Pippo", 63, 60)
+      def player = new PlayerWithPosition("Pippo", 63, 60)
 
-    when:
-      def response = command.movePlayer("Pippo", "1,", "2")
-    then:
-      response == "Pippo rolls 1, 2. Pippo moves from 60 to 63. Pippo Wins!!"
+    expect:
+      formatter.reply(player, 1, 2) == "Pippo rolls 1, 2. Pippo moves from 60 to 63. Pippo Wins!!"
   }
+
+  def "give details when player bounce"() {
+    given:
+      def player = new PlayerWithPosition("Pippo", 61, 60)
+
+    expect:
+      formatter.reply(player, 3, 2) == "Pippo rolls 3, 2. Pippo moves from 60 to 63. Pippo bounces! Pippo returns to 61"
+  }
+
 }

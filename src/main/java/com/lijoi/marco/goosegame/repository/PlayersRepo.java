@@ -34,6 +34,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static com.lijoi.marco.goosegame.PlayerWithPosition.END_POSITION_INDEX;
+
 @Repository
 public class PlayersRepo implements PlayersRepoInterface {
 
@@ -93,6 +95,11 @@ public class PlayersRepo implements PlayersRepoInterface {
     }
 
     private int computeNextPosition(PlayerWithPosition player, int diceValue, int otherDiceValue) {
-        return player.getCurrentPosition() + diceValue + otherDiceValue;
+        int newPosition = player.getCurrentPosition() + diceValue + otherDiceValue;
+        if (newPosition > END_POSITION_INDEX) {
+            newPosition = END_POSITION_INDEX - (newPosition - END_POSITION_INDEX);
+        }
+
+        return newPosition;
     }
 }

@@ -26,26 +26,24 @@ package com.lijoi.marco.goosegame.commands;
  */
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
 import com.lijoi.marco.goosegame.PlayerWithPosition;
+import com.lijoi.marco.goosegame.formatters.MoveReplyFormatter;
 import com.lijoi.marco.goosegame.repository.PlayersRepoInterface;
-import org.apache.commons.text.StringSubstitutor;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
 
 import javax.inject.Inject;
-import java.util.Map;
-
-import static com.lijoi.marco.goosegame.PlayerWithPosition.END_POSITION_INDEX;
 
 @ShellComponent
 public class MovePlayerCommand {
     private final PlayersRepoInterface playersRepo;
+    private final MoveReplyFormatter moveReplyFormatter;
 
     @Inject
-    public MovePlayerCommand(PlayersRepoInterface playersRepo) {
+    public MovePlayerCommand(PlayersRepoInterface playersRepo, MoveReplyFormatter moveReplyFormatter) {
         this.playersRepo = playersRepo;
+        this.moveReplyFormatter = moveReplyFormatter;
     }
 
     @ShellMethod(key = "move", value = "move player to another position")
@@ -62,22 +60,7 @@ public class MovePlayerCommand {
         PlayerWithPosition playerAfterMove = playersRepo.move(playerName, diceValue, otherDiceValue);
         playersRepo.saveNewPosition(playerAfterMove);
 
-        Map<String, String> valuesMap = ImmutableMap.of(
-                "playerName", playerName,
-                "dice1", String.valueOf(diceValue),
-                "dice2", String.valueOf(otherDiceValue),
-                "previousPosition", playerAfterMove.getPreviousPositionName(),
-                "nextPosition", playerAfterMove.getCurrentPositionName()
-        );
-
-        String templateString = "${playerName} rolls ${dice1}, ${dice2}. ${playerName} moves from ${previousPosition} to ${nextPosition}";
-
-        if (playerAfterMove.getCurrentPosition() == END_POSITION_INDEX) {
-            templateString += String.format(". %s Wins!!", playerName);
-        }
-
-        StringSubstitutor sub = new StringSubstitutor(valuesMap);
-        return sub.replace(templateString);
+        return moveReplyFormatter.reply(playerAfterMove, diceValue, otherDiceValue);
     }
 
     private int convertToInt(String diceValue) {
